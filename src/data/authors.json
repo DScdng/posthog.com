@@ -746,5 +746,12 @@
         "link_type": "linkedin",
         "link_url": "https://www.linkedin.com/in/rohnx/",
         "profile_id": 46998
+    },
+    {
+        "handle": "jake-sciotto",
+        "name": "Jake Sciotto",
+        "role": "Customer Success Manager",
+        "link_type": "twitter",
+        "link_url": "https://twitter.com/callmeshitto"
     }
 ]

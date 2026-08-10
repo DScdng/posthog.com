@@ -171,12 +171,12 @@ const ProjectCard = ({
     )
 }
 
-// Newest first: entries carry an added date; undated legacy entries sort last, alphabetically
+// Newest first by the explicit added date only – undated legacy entries deliberately sort
+// last, alphabetically. Strapi's createdAt is NOT a fallback: after migration it would make
+// every undated seed outrank dated projects with the migration run's timestamp.
 const byMostRecent = (a: SideProject, b: SideProject): number => {
-    const dateA = a.date || a.createdAt
-    const dateB = b.date || b.createdAt
-    const timeA = dateA ? new Date(dateA).getTime() : 0
-    const timeB = dateB ? new Date(dateB).getTime() : 0
+    const timeA = a.date ? new Date(a.date).getTime() : 0
+    const timeB = b.date ? new Date(b.date).getTime() : 0
     return timeB - timeA || a.title.localeCompare(b.title)
 }
 

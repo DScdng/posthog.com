@@ -14,6 +14,10 @@ import seedSideProjects from '../../data/sideProjects.json'
 
 const API_HOST = process.env.GATSBY_SQUEAK_API_HOST
 
+// Sentinel entry the seed script creates after every bundled project has been migrated.
+// Must match SEED_MIGRATION_MARKER in scripts/seed-side-projects.mjs.
+export const SEED_MIGRATION_MARKER = '__seed-migration-complete__'
+
 export type CreatorProfile = {
     squeakId: string
     firstName?: string
@@ -411,19 +415,20 @@ export const useSideProjects = (): {
             }
             if (collected.length > 0) {
                 // Bundled entries backfill the window between the collection deploying and the seed
-                // script running. Title matching can't distinguish "not yet migrated" from "deleted
-                // after migration", so treat migration as complete once most seed titles exist in
-                // Strapi: a partially-failed seed run or a single shadowing edit keeps the bundle
-                // visible, while post-migration deletes and renames stick instead of resurrecting
-                // bundled entries. (Once migration is confirmed, the seed file can be deleted.)
-                const apiTitles = new Set(collected.map((project) => project.title.trim().toLowerCase()))
-                const seeds = seedSideProjects as SideProject[]
-                const matched = seeds.filter((project) => apiTitles.has(project.title.trim().toLowerCase())).length
-                const migrationComplete = matched >= seeds.length / 2
+                // script finishing. Title matching alone can't distinguish "not yet migrated" from
+                // "deleted after migration", so the seed script writes an explicit completion marker
+                // entry once every seed has been created. Until the marker exists, unmatched seeds
+                // stay visible (partial runs lose nothing); once it exists, Strapi is authoritative,
+                // so moderator deletes and renames stick. The marker itself never renders.
+                const visible = collected.filter((project) => project.title !== SEED_MIGRATION_MARKER)
+                const migrationComplete = visible.length !== collected.length
+                const apiTitles = new Set(visible.map((project) => project.title.trim().toLowerCase()))
                 const unmigrated = migrationComplete
                     ? []
-                    : seeds.filter((project) => !apiTitles.has(project.title.trim().toLowerCase()))
-                setProjects([...collected, ...unmigrated])
+                    : (seedSideProjects as SideProject[]).filter(
+                          (project) => !apiTitles.has(project.title.trim().toLowerCase())
+                      )
+                setProjects([...visible, ...unmigrated])
                 setUsingFallback(false)
             }
         } catch (error) {

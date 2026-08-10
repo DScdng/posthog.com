@@ -118,7 +118,7 @@ To help the new owner of a customer hit the ground running, we should make sure 
 | CSM → TAM | When expansion opportunity identified | Customer not fully expanded and has clear growth potential |
 
 > For accounts who will be landing at $100k+ a year or have high expansion potential after the initial deal, we should involve a TAM early in the process to ensure a smooth transition. See the section further down this page on how this works.
-- When determining whether an account is a growth account or not, reviewing the criteria set out in the [lead qualification page](handbook/growth/sales/product-led-lead-qualification) can be helpful
+- When determining whether an account is a growth account or not, reviewing the criteria set out in the [lead qualification page](/handbook/growth/sales/product-led-lead-qualification) can be helpful
 - When in doubt, ask yourself: do I see this account growing in the next year? If not, it should not go to a TAM
 
 For handover to take place there should be an Account Plan (saved as a note on the account in Vitally) and the customer should have been onboarded properly to the products they are currently paying for.

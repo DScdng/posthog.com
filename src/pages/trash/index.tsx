@@ -60,7 +60,7 @@ export default function Trash(): JSX.Element {
                             {
                                 name: 'Long Term Contract Template.docx',
                                 slug: 'long-term-contract-template',
-                                url: '/long-term-contract-template', // placeholder link
+                                url: '/terms',
                                 extension: 'docx',
                                 color: 'blue',
                                 icon: 'doc' as AppIconName,

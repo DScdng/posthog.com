@@ -19,6 +19,7 @@ import {
     type CreatorProfile,
     type SideProject,
 } from 'components/SideProjects'
+import { navigate } from 'gatsby'
 import { useUser } from 'hooks/useUser'
 import React, { useEffect, useMemo, useState } from 'react'
 import { useWindow } from '../context/Window'
@@ -210,7 +211,9 @@ function SideProjectsPage({ location }: { location: { search: string } }): JSX.E
         }
     }, [location?.search, windowSearch])
 
-    // Update URL when filters change
+    // Update URL when filters change. Go through the router (not history.replaceState) so the
+    // app shell's stored window location stays in sync – refocusing the window re-navigates
+    // using appWindow.location.search, which would otherwise restore the stale query.
     const updateURL = (tag: string | null, creator: string | null) => {
         if (typeof window === 'undefined') {
             return
@@ -223,7 +226,7 @@ function SideProjectsPage({ location }: { location: { search: string } }): JSX.E
             params.set('creator', creator)
         }
         const search = params.toString()
-        window.history.replaceState({}, '', search ? `${window.location.pathname}?${search}` : window.location.pathname)
+        navigate(search ? `${window.location.pathname}?${search}` : window.location.pathname, { replace: true })
     }
 
     const handleTagChange = (tag: string | null) => {

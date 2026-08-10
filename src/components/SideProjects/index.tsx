@@ -410,11 +410,16 @@ export const useSideProjects = (): {
                 page += 1
             }
             if (collected.length > 0) {
-                // Strapi entries win; bundled entries not yet migrated stay visible under them
+                // Bundled entries only backfill the window between the collection deploying and the
+                // seed script running. Once any seed title exists in Strapi, migration has happened
+                // and Strapi is authoritative – merging by title absence after that point would
+                // resurrect seed projects a moderator deleted or renamed.
                 const apiTitles = new Set(collected.map((project) => project.title.trim().toLowerCase()))
-                const unmigrated = (seedSideProjects as SideProject[]).filter(
-                    (project) => !apiTitles.has(project.title.trim().toLowerCase())
-                )
+                const seeds = seedSideProjects as SideProject[]
+                const migrated = seeds.some((project) => apiTitles.has(project.title.trim().toLowerCase()))
+                const unmigrated = migrated
+                    ? []
+                    : seeds.filter((project) => !apiTitles.has(project.title.trim().toLowerCase()))
                 setProjects([...collected, ...unmigrated])
                 setUsingFallback(false)
             }
@@ -464,7 +469,9 @@ type SideProjectFormValues = {
     githubUrl: string
     liveUrl: string
     tags: string
-    alumni: boolean
+    // undefined means "automatic": classification falls back to the creator's team membership.
+    // Only an explicit toggle by the moderator writes a boolean override.
+    alumni: boolean | undefined
 }
 
 const toFormValues = (project?: SideProject): SideProjectFormValues => ({
@@ -475,7 +482,7 @@ const toFormValues = (project?: SideProject): SideProjectFormValues => ({
     githubUrl: project?.githubUrl || '',
     liveUrl: project?.liveUrl || '',
     tags: (project?.tags || []).join(', '),
-    alumni: Boolean(project?.alumni),
+    alumni: project?.alumni,
 })
 
 // Add/edit form for logged-in PostHog team members, writing straight to the Strapi
@@ -512,11 +519,11 @@ export const SideProjectForm = ({
     const canSubmit =
         Boolean(
             values.title.trim() &&
-                values.description.trim() &&
-                values.projectAuthor.trim() &&
-                (githubUrl || liveUrl) &&
-                (!githubUrl || isValidProjectUrl(githubUrl)) &&
-                (!liveUrl || isValidProjectUrl(liveUrl))
+            values.description.trim() &&
+            values.projectAuthor.trim() &&
+            (githubUrl || liveUrl) &&
+            (!githubUrl || isValidProjectUrl(githubUrl)) &&
+            (!liveUrl || isValidProjectUrl(liveUrl))
         ) && !submitting
 
     const handleSubmit = async (event: React.FormEvent) => {
@@ -546,11 +553,14 @@ export const SideProjectForm = ({
                 data: {
                     title: values.title.trim(),
                     description: values.description.trim(),
-                    // The added date drives "newest first" ordering; keep it stable on edits
-                    date: project?.date || new Date().toISOString().slice(0, 10),
+                    // The added date drives "newest first" ordering: new entries get today,
+                    // edits keep the existing date – including its absence, since undated
+                    // legacy entries deliberately sort last
+                    date: project ? project.date || null : new Date().toISOString().slice(0, 10),
                     projectAuthor: values.projectAuthor.trim(),
                     authorGitHub: values.authorGitHub.trim() || null,
-                    alumni: values.alumni,
+                    // null preserves automatic alumni detection; a boolean is an explicit override
+                    alumni: values.alumni ?? null,
                     githubUrl: githubUrl || null,
                     liveUrl: liveUrl || null,
                     projectThumbnail: thumbnailUrl || null,
@@ -661,11 +671,15 @@ export const SideProjectForm = ({
             <label className="flex items-center gap-2 text-[15px]">
                 <input
                     type="checkbox"
-                    checked={values.alumni}
+                    checked={Boolean(values.alumni)}
                     onChange={(event) => setValues((prev) => ({ ...prev, alumni: event.target.checked }))}
                 />
                 <span>
-                    List under PostHog Alums <span className="text-secondary">(the creator has left PostHog)</span>
+                    List under PostHog Alums{' '}
+                    <span className="text-secondary">
+                        (the creator has left PostHog – detected automatically from their community profile unless set
+                        here)
+                    </span>
                 </span>
             </label>
             <div className="flex items-center gap-2">

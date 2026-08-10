@@ -410,14 +410,17 @@ export const useSideProjects = (): {
                 page += 1
             }
             if (collected.length > 0) {
-                // Bundled entries only backfill the window between the collection deploying and the
-                // seed script running. Once any seed title exists in Strapi, migration has happened
-                // and Strapi is authoritative – merging by title absence after that point would
-                // resurrect seed projects a moderator deleted or renamed.
+                // Bundled entries backfill the window between the collection deploying and the seed
+                // script running. Title matching can't distinguish "not yet migrated" from "deleted
+                // after migration", so treat migration as complete once most seed titles exist in
+                // Strapi: a partially-failed seed run or a single shadowing edit keeps the bundle
+                // visible, while post-migration deletes and renames stick instead of resurrecting
+                // bundled entries. (Once migration is confirmed, the seed file can be deleted.)
                 const apiTitles = new Set(collected.map((project) => project.title.trim().toLowerCase()))
                 const seeds = seedSideProjects as SideProject[]
-                const migrated = seeds.some((project) => apiTitles.has(project.title.trim().toLowerCase()))
-                const unmigrated = migrated
+                const matched = seeds.filter((project) => apiTitles.has(project.title.trim().toLowerCase())).length
+                const migrationComplete = matched >= seeds.length / 2
+                const unmigrated = migrationComplete
                     ? []
                     : seeds.filter((project) => !apiTitles.has(project.title.trim().toLowerCase()))
                 setProjects([...collected, ...unmigrated])

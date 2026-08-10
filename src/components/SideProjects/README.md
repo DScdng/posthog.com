@@ -4,7 +4,7 @@ Shared utilities and components behind the side projects gallery at `/side-proje
 
 ## Data contract
 
-Projects live in the Squeak Strapi `side-projects` collection (same backend as `/events`) and are fetched client-side. `src/data/sideProjects.json` is the bundled seed: it renders immediately, stays up if the API is unreachable, and any seed entry whose title isn't in the API yet remains visible under the API results. `scripts/seed-side-projects.mjs` migrates the seed into Strapi.
+Projects live in the Squeak Strapi `side-projects` collection (same backend as `/events`) and are fetched client-side. `src/data/sideProjects.json` is the bundled seed: it renders immediately, stays up if the API is unreachable, and until migration completes any seed entry whose title isn't in the API yet remains visible under the API results. `scripts/seed-side-projects.mjs` migrates the seed into Strapi. Migration is considered complete once most seed titles exist in Strapi – from then on Strapi is authoritative, so moderator deletes and renames stick. After confirming the migration, delete `sideProjects.json`'s entries (or the merge) in a follow-up.
 
 Fields (`SideProject`):
 

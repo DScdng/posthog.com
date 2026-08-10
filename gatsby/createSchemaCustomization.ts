@@ -66,17 +66,17 @@ export const createSchemaCustomization: GatsbyNode['createSchemaCustomization'] 
       teamData: TeamData
       profile: SqueakProfile @link(by: "github", from: "url")
     }
+    type FrontmatterFilters {
+      tags: [String]
+      type: [String]
+      maintainer: String
+    }
     type FrontmatterSEO {
       metaTitle: String
       metaDescription: String
     }
     type AuthorsJson implements Node {
       profile: SqueakProfile @link(by: "squeakId", from: "profile_id")
-    }
-    type FrontmatterFilters {
-      tags: [String]
-      type: [String]
-      maintainer: String
     }
     type Frontmatter {
       authorData: [AuthorsJson] @link(by: "handle", from: "author")

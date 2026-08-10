@@ -210,7 +210,7 @@ const CreatorAvatar = ({
             }`}
         >
             {avatarUrl ? (
-                <img src={avatarUrl} alt="" className="size-full object-cover" />
+                <img src={avatarUrl} alt="" loading="lazy" className="size-full object-cover" />
             ) : authorGitHub ? (
                 <img
                     src={`https://github.com/${authorGitHub}.png?size=64`}
